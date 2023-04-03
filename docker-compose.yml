@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: hml_image
+      target: dev_image
     environment:
       - TZ=America/Sao_Paulo
     network_mode: bridge
