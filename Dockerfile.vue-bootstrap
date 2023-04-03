@@ -1,0 +1,44 @@
+FROM docker.io/library/node:lts-slim AS bootstrap
+WORKDIR /tmp
+USER node
+RUN npm install @vue/cli \
+&& npx -c 'vue create myapp --default --no-git --bare --skipGetStarted --packageManager yarn' \
+&& rm -rf myapp/node_modules
+
+RUN echo '\
+<template> \n\
+  <img alt="Vue logo" src="./assets/logo.png"> \n\
+  <h1>Welcome to Your Vue.js App</h1> \n\
+  <h1>API Endpoint: {{ msg }}</h1> \n\
+</template> \n\
+<script> \n\
+export default { \n\
+  name: "API Endpoint", \n\
+  data() { \n\
+    return { \n\
+      msg: process.env.VUE_APP_API_ENDPOINT \n\
+    }; \n\
+  } \n\
+} \n\
+</script> \n\
+<style> #app { \n\
+  font-family: Avenir, Helvetica, Arial, sans-serif; \n\
+  -webkit-font-smoothing: antialiased; \n\
+  -moz-osx-font-smoothing: grayscale; \n\
+  text-align: center; \n\
+  color: #2c3e50; \n\
+  margin-top: 60px; \n\
+  } \n\
+</style> \n\
+' > myapp/src/App.vue
+
+RUN set -ex \
+&& echo 'VUE_APP_API_ENDPOINT=http://dev-myapp.local' > myapp/.env.development \
+&& echo 'VUE_APP_API_ENDPOINT=http://hml-myapp.local' > myapp/.env.staging \
+&& echo 'VUE_APP_API_ENDPOINT=http://myapp.local' > myapp/.env.production
+
+FROM scratch as vue-bootstrap
+COPY --from=bootstrap /tmp/myapp /
+
+# export DOCKER_BUILDKIT=1
+# docker build -o . ./ -f ./Dockerfile.vue-bootstrap --progress=plain --target vue-bootstrap
