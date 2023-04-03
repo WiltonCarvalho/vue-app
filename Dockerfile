@@ -7,21 +7,18 @@ RUN set -ex \
 FROM pre-build as build-dev
 WORKDIR /tmp/code
 COPY . .
-
 RUN set -ex \
     && yarn build --mode development 2>/dev/null
 
 FROM pre-build as build-hml
 WORKDIR /tmp/code
 COPY . .
-
 RUN set -ex \
     && yarn build --mode staging 2>/dev/null
 
 FROM pre-build as build-prod
 WORKDIR /tmp/code
 COPY . .
-
 RUN set -ex \
     && yarn build --mode production 2>/dev/null
 
