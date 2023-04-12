@@ -1,22 +1,22 @@
-FROM docker.io/library/node:12 as pre-build
+FROM --platform=amd64 docker.io/library/node:12 as pre-build
 WORKDIR /tmp/code
 COPY ["package.json", "package-lock.json*", "yarn.lock", "./"]
 RUN set -ex \
     && yarn install
 
-FROM pre-build as build-dev
+FROM --platform=amd64 pre-build as build-dev
 WORKDIR /tmp/code
 COPY . .
 RUN set -ex \
     && yarn build --mode development 2>/dev/null
 
-FROM pre-build as build-hml
+FROM --platform=amd64 pre-build as build-hml
 WORKDIR /tmp/code
 COPY . .
 RUN set -ex \
     && yarn build --mode staging 2>/dev/null
 
-FROM pre-build as build-prod
+FROM --platform=amd64 pre-build as build-prod
 WORKDIR /tmp/code
 COPY . .
 RUN set -ex \
