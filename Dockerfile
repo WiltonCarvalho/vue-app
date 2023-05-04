@@ -1,4 +1,4 @@
-FROM --platform=amd64 docker.io/library/node:12 as pre-build
+FROM --platform=amd64 docker.io/library/node:18-slim as pre-build
 WORKDIR /tmp/code
 COPY ["package.json", "package-lock.json*", "yarn.lock", "./"]
 RUN set -ex \
@@ -40,6 +40,13 @@ FROM docker.io/nginxinc/nginx-unprivileged:stable AS dev_image
 COPY --from=build-dev /tmp/code/dist /usr/share/nginx/html
 RUN set -ex \
     && sed -i '1i server_tokens off;' /etc/nginx/conf.d/default.conf \
+    && sed -i '2i add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";' /etc/nginx/conf.d/default.conf \
+    && sed -i '3i add_header Referrer-Policy "no-referrer-when-downgrade";' /etc/nginx/conf.d/default.conf \
+    && sed -i '4i add_header Content-Security-Policy " ";' /etc/nginx/conf.d/default.conf \
+    && sed -i '5i add_header X-XSS-Protection "1; mode=block";' /etc/nginx/conf.d/default.conf \
+    && sed -i '6i add_header X-Frame-Options "sameorigin";' /etc/nginx/conf.d/default.conf \
+    && sed -i '7i add_header X-Content-Type-Options "nosniff";' /etc/nginx/conf.d/default.conf \
+    && sed -i '8i add_header Set-Cookie "HttpOnly; Secure";' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "HealthCheck" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "ELB-HealthChecker" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $remote_addr ~* "127.0.0.1" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
@@ -51,6 +58,13 @@ FROM docker.io/nginxinc/nginx-unprivileged:stable AS hml_image
 COPY --from=build-hml /tmp/code/dist /usr/share/nginx/html
 RUN set -ex \
     && sed -i '1i server_tokens off;' /etc/nginx/conf.d/default.conf \
+    && sed -i '2i add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";' /etc/nginx/conf.d/default.conf \
+    && sed -i '3i add_header Referrer-Policy "no-referrer-when-downgrade";' /etc/nginx/conf.d/default.conf \
+    && sed -i '4i add_header Content-Security-Policy " ";' /etc/nginx/conf.d/default.conf \
+    && sed -i '5i add_header X-XSS-Protection "1; mode=block";' /etc/nginx/conf.d/default.conf \
+    && sed -i '6i add_header X-Frame-Options "sameorigin";' /etc/nginx/conf.d/default.conf \
+    && sed -i '7i add_header X-Content-Type-Options "nosniff";' /etc/nginx/conf.d/default.conf \
+    && sed -i '8i add_header Set-Cookie "HttpOnly; Secure";' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "HealthCheck" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "ELB-HealthChecker" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $remote_addr ~* "127.0.0.1" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
@@ -62,6 +76,13 @@ FROM docker.io/nginxinc/nginx-unprivileged:stable AS prod_image
 COPY --from=build-prod /tmp/code/dist /usr/share/nginx/html
 RUN set -ex \
     && sed -i '1i server_tokens off;' /etc/nginx/conf.d/default.conf \
+    && sed -i '2i add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";' /etc/nginx/conf.d/default.conf \
+    && sed -i '3i add_header Referrer-Policy "no-referrer-when-downgrade";' /etc/nginx/conf.d/default.conf \
+    && sed -i '4i add_header Content-Security-Policy " ";' /etc/nginx/conf.d/default.conf \
+    && sed -i '5i add_header X-XSS-Protection "1; mode=block";' /etc/nginx/conf.d/default.conf \
+    && sed -i '6i add_header X-Frame-Options "sameorigin";' /etc/nginx/conf.d/default.conf \
+    && sed -i '7i add_header X-Content-Type-Options "nosniff";' /etc/nginx/conf.d/default.conf \
+    && sed -i '8i add_header Set-Cookie "HttpOnly; Secure";' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "HealthCheck" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $http_user_agent ~* "ELB-HealthChecker" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
     && sed -i '/location \//a if ( $remote_addr ~* "127.0.0.1" ) { access_log off; }' /etc/nginx/conf.d/default.conf \
