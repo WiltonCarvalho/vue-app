@@ -1,0 +1,28 @@
+docker build -o . https://raw.githubusercontent.com/WiltonCarvalho/vue-app/main/Dockerfile.vue-bootstrap --progress=plain
+
+docker buildx create --name image-builder --use
+
+docker buildx build --platform=linux/amd64,linux/arm64/v8 --pull --sbom=false --provenance=false \
+  -o type=oci,dest=- \
+  --progress=plain . > /tmp/my-oci-image.tar
+
+skopeo inspect --raw oci-archive:/tmp/my-oci-image.tar | jq
+
+docker run -d --rm --name registry -p 5000:5000 registry:2
+
+skopeo copy --all --format v2s2 oci-archive:/tmp/my-oci-image.tar \
+  docker://127.0.0.1:5000/my-docker-image:v1 \
+  --dest-tls-verify=false
+
+skopeo copy oci-archive:/tmp/my-oci-image.tar \
+  docker://127.0.0.1:5000/my-docker-image:v1-amd64 \
+  --dest-tls-verify=false \
+  --override-arch=amd64
+
+skopeo copy oci-archive:/tmp/my-oci-image.tar \
+  docker://127.0.0.1:5000/my-docker-image:v1-arm64 \
+  --dest-tls-verify=false \
+  --override-arch=arm64
+
+skopeo inspect --raw --tls-verify=false docker://127.0.0.1:5000/my-docker-image:v1 | jq
+skopeo inspect --tls-verify=false docker://127.0.0.1:5000/my-docker-image:v1 | jq
